@@ -1,0 +1,27 @@
+## API (Application Programming Interface)
+
+API is the intermediary that allows two or more applications to talk to each other.
+
+### API Types in Terms of Release Policies
+- **Private**: It can be used within the organization.
+- **Partner**: It can be used within the business organization.
+- **Public**: It can be used by any third-party developers.
+
+> Note: We use API for making communication from any platform (Android, Mac, Linux) to the same backend.
+
+### How Can We Use API?
+To use an API, we need a token or API key of that API.
+
+## Web API
+- The API which is an interface for the web is called a web API.
+- It may consist of one or more endpoints to define request and response.
+
+### How Web API Works
+- Let's say we have an Android device, web API, web application, and database.
+  - Client makes an HTTP request to the API.
+  - API will communicate with the web application/database (if needed).
+  - Web application/database provides required data to the API.
+  - API returns data to the client.
+
+### How to Use Web API
+- First, we will sign up to the API. After signing in, we will get an API key. Whenever we have to communicate, we will send a request to the API with the API key to authenticate us. If authentication is successful, we will get services/data from the database.

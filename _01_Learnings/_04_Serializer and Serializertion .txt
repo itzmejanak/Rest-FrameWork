@@ -1,0 +1,85 @@
+## Serializer and Serialization
+
+### Python JSON
+Python has a built-in package called `json`, which is used to work with JSON data. Here are two methods commonly used:
+
+- **`dumps(data)`**: This is used to convert a Python object into a JSON string.
+  ```python
+  import json
+
+  py_obj = {'name': 'Ram', 'roll': 123}
+  json_data = json.dumps(py_obj)
+  ```
+
+- **`loads(data)`**: This is used to parse JSON string into Python data.
+  ```python
+  import json
+
+  json_data = '{"name": "Ram", "roll": 123}'
+  parsed_data = json.loads(json_data)
+  ```
+
+### Serializer
+In Django REST Framework, serializers are responsible for converting complex data, such as querysets and model instances, to native Python datatypes (serialization). These datatypes can then be easily rendered into JSON, XML, or other content types understandable by front ends. 
+
+Serializers also handle deserialization, allowing parsed data to be converted back into complex types, after first validating the incoming data.
+
+#### Serialization:
+Serialization refers to converting complex data types (like model instances) into native Python data types.
+
+#### Deserialization:
+Deserialization involves converting parsed data back into complex types, after validating it.
+
+### Serializer Class
+A serializer class in DRF is similar to a Django form or ModelForm class. It includes validation flags on various fields such as `required`, `max_length`, and `default`.
+
+DRF provides:
+- **Serializer class**: A powerful, generic way to control the output of your response.
+- **ModelSerializer class**: A shortcut for creating serializers that deal with model instances and querysets.
+
+#### How to Create a Serializer Class
+Create a separate `serializers.py` file to write all serializers:
+```python
+from rest_framework import serializers
+
+class StudentsSerializer(serializers.Serializer):
+    name = serializers.CharField(max_length=10)
+```
+
+#### Understanding Serialization in Short
+In `models.py`, we have model classes which represent database tables. Each model class contains instances (rows) of complex data types. Our goal is to convert these complex data types into native Python data types and then convert them to JSON using the `dumps` method.
+
+#### Converting Complex Data Types into JSON
+1. Get instances of the model class:
+   ```python
+   model_objs = Services.objects.all()
+   ```
+2. Pass the model class objects to the serializer class:
+   ```python
+   serializer = ServicesSerializer(model_objs, many=True)
+   ```
+3. To view the data in the `serializer` object:
+   ```python
+   print(serializer.data)
+   ```
+
+#### Rendering Serialized Data into JSON
+To render serialized data into JSON understandable by front ends, use `JSONRenderer` or 'dumps':
+```python
+from rest_framework.renderers import JSONRenderer
+import json
+
+# by `JSONRenderer` 
+json_data = JSONRenderer().render(serializer.data)
+
+#by dumps
+j_data = json.dumps(serializer.data)
+```
+
+#### Optional: `JsonResponse()`
+- `JsonResponse(data, encoder=DjangoJSONRenderer, safe=True, json_dumps_params=None, **kwargs)`
+- It is an `HttpResponse` subclass that helps create a JSON-encoded response.
+- The `data` parameter must be a dictionary.
+- If `safe` parameter is `False`, it will work for any data, not just dictionaries.
+- The `encoder` parameter serializes the data.
+- The `json_dumps_params` parameter converts serialized data to JSON.

@@ -1,0 +1,61 @@
+## REST
+
+To understand REST API, we need to know about API and Web API that we discussed before.
+
+### REST
+- REST is the architectural guideline to develop Web APIs.
+
+### REST API
+The API which is developed by following the guidelines made in the REST web guideline is known as REST API. 
+
+> Note: REST API and RESTful API are the same. Don't get confused about them.
+
+### How REST Web API Works
+Let's say we have an Android application, Web API, web application, and database.
+
+Whenever the client makes an HTTP request to the API:
+1. The API communicates with the web application/database.
+2. The web application/database provides the required data to the Web API.
+3. The Web API then provides the response to the client (Android application).
+
+> Note: The request is made by HTTP, and the data we receive may be in JSON or XML format.
+
+### CRUD Operations in REST API
+When talking about REST API, we are generally talking about CRUD operations.
+
+| Operation | HTTP Methods | Description |
+|-----------|---------------|-------------|
+| Create    | POST          | Creating/Posting/Inserting Data |
+| Read      | GET           | Reading/Getting/Retrieving Data |
+| Update    | PUT/PATCH     | Updating Data (Complete update - PUT, Partial update - PATCH) |
+| Delete    | DELETE        | Deleting Data |
+
+### Understanding URL
+```
+http://greekyshows.com/api/students
+```
+- **Base URL**: `http://greekyshows.com`
+- **API**: Naming convention to indicate that inside API we have endpoints
+- **Students**: Resource of API/endpoints
+
+### Understanding Request and Response
+
+#### Getting All Data
+- **Request**: `GET /api/students`
+- **Response**: `[{id:1, name: Janak}, {id:2, name: Ram}]`
+
+#### Getting Specific Data
+- **Request**: `GET /api/students/1`
+- **Response**: `[{id:1, name: Janak}]`
+
+#### Inserting Data
+- **Request**: `POST /api/students {id:2, name: Ram}`
+- **Response**: `[{id:2, name: Ram}]`
+
+#### Updating Data
+- **Request**: `PUT or PATCH /api/students/1 {name: Sita}`
+- **Response**: `[{id:1, name: Sita}]`
+
+#### Deleting Data
+- **Request**: `DELETE /api/students/1`
+- **Response**: `[{id:1, name: Sita}]`

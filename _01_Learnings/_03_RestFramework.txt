@@ -1,0 +1,29 @@
+## Django REST Framework (DRF)
+
+Django REST Framework is a powerful and flexible toolkit for building web APIs.
+
+### Why Choose Django REST Framework?
+- The web browsable API is a huge usability win for developers.
+- Authentication policies include packages for OAuth1 and OAuth2.
+- Serialization that supports both ORM and non-ORM data sources.
+
+### Requirements to Learn DRF
+- Python
+- Django
+
+> Learn the basics of these before diving into Django REST Framework.
+
+### Set Up
+
+1. **Install Django REST Framework using pip:**
+   ```bash
+   pip install djangorestframework
+   ```
+
+2. **Configure the `settings.py` of the Django project:**
+   ```python
+   INSTALLED_APPS = [
+       ...,
+       'rest_framework',
+   ]
+   ```
