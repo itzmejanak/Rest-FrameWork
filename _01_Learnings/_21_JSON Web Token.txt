@@ -1,0 +1,171 @@
+## JSON Web Token (JWT) Authentication
+JSON Web Token (JWT) is a compact, URL-safe token used for authentication between a client and a server. Unlike Django's default token authentication, which uses a static token for each user, JWT provides a dynamic, secure way to authenticate requests. JWT tokens include an encoded payload with user data and an expiration time, enhancing security. They are self-contained, meaning the server doesn't need to store them, reducing server load. JWTs are ideal for stateless, scalable applications, especially in mobile and web apps, as they allow for easy token refresh and provide a more flexible, robust authentication mechanism.
+
+#### 1. Install Required Packages
+
+First, install the `djangorestframework-simplejwt` package:
+
+```bash
+pip install djangorestframework-simplejwt
+```
+
+### Locally Used JWT Authentication
+
+**Locally** using JWT means applying it to specific views or viewsets:
+
+#### Example
+
+```python
+from rest_framework import viewsets
+from rest_framework.permissions import IsAuthenticated
+from rest_framework_simplejwt.authentication import JWTAuthentication
+from .models import Student
+from .serializers import StudentSerializer
+
+class StudentsApiViewSet(viewsets.ModelViewSet):
+    queryset = Student.objects.all()
+    serializer_class = StudentSerializer
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
+```
+
+- **Usage:** Only specific views require JWT authentication.
+- **Advantages:** More control over which parts of the API are protected.
+
+### Globally Used JWT Authentication
+
+**Globally** using JWT means setting it for all views by default:
+
+#### Settings Configuration
+
+In `settings.py`, configure the default authentication:
+
+```python
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    ),
+    'DEFAULT_PERMISSION_CLASSES': (
+        'rest_framework.permissions.IsAuthenticated',
+    ),
+}
+```
+
+- **Usage:** All API endpoints require JWT authentication by default.
+- **Advantages:** Ensures consistent security across the entire API.
+
+#### 3. Configure URLs
+
+In your `urls.py`, set up routes for obtaining and refreshing tokens:
+
+```python
+from django.urls import path
+from rest_framework_simplejwt.views import (
+    TokenObtainPairView,
+    TokenRefreshView,
+    TokenVerifyView,
+)
+
+urlpatterns = [
+    path('api/gettoken/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
+    path('api/refreshtoken/', TokenRefreshView.as_view(), name='token_refresh'),
+    path('api/verifytoken/', TokenVerifyView.as_view(), name='token_verify'),
+]
+
+```
+
+#### 4. Protect Your Views
+
+Apply authentication and permission classes to your views:
+
+```python
+from rest_framework import viewsets
+from rest_framework.permissions import IsAuthenticated
+from .models import Student
+from .serializers import StudentSerializer
+
+class StudentsApiViewSet(viewsets.ModelViewSet):
+    queryset = Student.objects.all()
+    serializer_class = StudentSerializer
+    permission_classes = [IsAuthenticated]
+```
+
+### How JWT Works
+
+- **TokenObtainPairView:** Used to obtain a new access and refresh token pair.
+- **TokenRefreshView:** Used to refresh an access token using a refresh token.
+
+> [!IMPORTANT]
+>
+> JSON Web Tokens (JWT) work by securely encoding user information into a token. This token is stateless, meaning the server doesn't store it. It has three parts: a header (algorithm info), a payload (user details and expiration), and a signature (ensures security). Unlike Django's default token, which needs server-side storage, JWT can be quickly verified by the server without database checks. This makes JWT ideal for efficient, scalable applications.
+>
+> 
+
+### Simple JWT Customization
+
+If you want to customize the token lifetime, update `settings.py`:
+
+```python
+from datetime import timedelta
+
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=5),
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
+    'ROTATE_REFRESH_TOKENS': False,
+    'BLACKLIST_AFTER_ROTATION': True,
+    'ALGORITHM': 'HS256',
+    # Additional settings...
+}
+```
+
+### HTTPie Commands with Authentication
+
+#### GET Request
+
+Retrieve a list of items or a specific item.
+
+```bash
+http GET http://127.0.0.1:8000/api/items/ "Authorization: Bearer your_token_here"
+http GET http://127.0.0.1:8000/api/items/1/ "Authorization: Bearer your_token_here"
+```
+
+#### POST Request
+
+Create a new item.
+
+```bash
+http POST http://127.0.0.1:8000/api/items/ name="NewItem" description="Description" "Authorization: Bearer your_token_here"
+```
+
+#### PUT Request
+
+Update an existing item completely.
+
+```bash
+http PUT http://127.0.0.1:8000/api/items/1/ name="UpdatedItem" description="NewDescription" "Authorization: Bearer your_token_here"
+```
+
+#### PATCH Request
+
+Update part of an existing item.
+
+```bash
+http PATCH http://127.0.0.1:8000/api/items/1/ description="PartialUpdate" "Authorization: Bearer your_token_here"
+```
+
+#### DELETE Request
+
+Delete an existing item.
+
+```bash
+http DELETE http://127.0.0.1:8000/api/items/1/ "Authorization: Bearer your_token_here"
+```
+
+Replace `your_token_here` with the actual JWT token.
+
+### Summary
+
+- **Installation:** Use `djangorestframework-simplejwt`.
+- **Configuration:** Set up in `settings.py` and configure URLs for token operations.
+- **Protection:** Use `JWTAuthentication` and set `IsAuthenticated` permissions on views.
+---

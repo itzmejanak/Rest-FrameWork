@@ -1,0 +1,57 @@
+## Throttling
+
+Throttling in Django REST Framework is a way to control the rate of requests a user can make to your API. It helps prevent abuse and ensures fair usage by limiting how many times a user can access the API within a given timeframe. Throttling can be set globally or for specific views. Common types include AnonRateThrottle for anonymous users and UserRateThrottle for authenticated users. Each type has a rate limit defined, such as "1000/day" or "5/minute". When a user exceeds the limit, they receive a "429 Too Many Requests" response. To implement throttling, you configure it in the `settings.py` file and specify the rates you want to enforce. This helps maintain performance and security by reducing server load and deterring excessive access attempts.
+
+### Throttling in Django REST Framework
+
+Throttling controls the rate of requests a client can make to your API. It prevents abuse and ensures fair usage by setting limits on how frequently requests can be made.
+
+#### How Throttling Works
+
+1. **Global Settings:** Define default throttle classes and rates in `settings.py`:
+
+   ```python
+   REST_FRAMEWORK = {
+       'DEFAULT_THROTTLE_CLASSES': [
+           'rest_framework.throttling.AnonRateThrottle',
+           'rest_framework.throttling.UserRateThrottle'
+       ],
+       'DEFAULT_THROTTLE_RATES': {
+           'anon': '100/day',
+           'user': '1000/day'
+       }
+   }
+   ```
+
+2. **Types of Throttles:**
+   - **AnonRateThrottle:** Limits requests from anonymous users.
+   - **UserRateThrottle:** Limits requests from authenticated users.
+
+3. **Custom Throttling:**
+   - Create a custom throttle class by subclassing `BaseThrottle` and implementing the `allow_request` and `wait` methods.
+
+4. **View-Level Throttling:**
+   - Apply throttling to specific views:
+
+   ```python
+   from rest_framework.views import APIView
+   from rest_framework.throttling import UserRateThrottle
+
+   class CustomThrottleView(APIView):
+       throttle_classes = [UserRateThrottle]
+
+       def get(self, request):
+           return Response({"message": "Hello, world!"})
+   ```
+
+5. **Handling Throttle Exceedance:**
+   - When a client exceeds the throttle limit, a "429 Too Many Requests" response is returned.
+
+6. **Monitoring Throttling:**
+   - Use logging to monitor throttle usage and adjust rates as needed.
+
+### Summary
+
+Throttling ensures API stability by regulating request rates, protecting against overuse, and maintaining performance. It can be applied globally or per-view and customized to fit specific needs.
+
+---

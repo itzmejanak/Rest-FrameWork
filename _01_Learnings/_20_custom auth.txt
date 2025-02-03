@@ -1,0 +1,80 @@
+## Custom Authentication
+- To implement a custom authentication we have to extends the BaseAuthentication class and we have to override the authenticate(self, request) method.
+
+- This method will return if success a two-tuples of ((user, auth) else succeds, or None otherwise.
+
+#### `custom_auth.py`
+
+Create a new file named `custom_auth.py` (or any name you prefer) and define your custom authentication class:
+
+```python
+from rest_framework.authentication import BaseAuthentication
+from rest_framework.exceptions import AuthenticationFailed
+from django.contrib.auth.models import User
+
+class CustomAuth(BaseAuthentication):
+    def authenticate(self, request):
+        username = request.GET.get("username")
+        if username is None:
+            return None
+        
+        try:
+            user = User.objects.get(username=username)
+        except User.DoesNotExist:
+            raise AuthenticationFailed("No such user")
+        
+        return (user, None)
+```
+
+#### Explanation
+
+- **BaseAuthentication:** The class `CustomAuth` inherits from `BaseAuthentication`.
+- **authenticate(self, request):** This method retrieves the `username` from query parameters and tries to find the corresponding `User` object.
+- **Exception Handling:** If the user does not exist, it raises an `AuthenticationFailed` exception.
+- **Return Value:** If successful, it returns a tuple `(user, None)`. Otherwise, it returns `None`.
+
+### 2. Use the Custom Authentication Class in Your View
+
+#### `views.py`
+
+Import your custom authentication class and apply it to your view:
+
+```python
+from rest_framework import viewsets
+from .custom_auth import CustomAuth
+from rest_framework.permissions import IsAuthenticated
+from .models import Student
+from .serializers import StudentSerializer
+
+class StudentsApiViewSet(viewsets.ModelViewSet):
+    queryset = Student.objects.all()
+    serializer_class = StudentSerializer
+    authentication_classes = [CustomAuth]  # Use custom authentication class here
+    permission_classes = [IsAuthenticated]  # Ensure user is authenticated
+```
+
+#### Explanation
+
+- **authentication_classes:** Specifies the custom authentication class to use for this view.
+- **permission_classes:** Ensures that only authenticated users can access this view.
+
+### 3. Update `settings.py`
+
+Ensure that your custom authentication class is included in the `DEFAULT_AUTHENTICATION_CLASSES` if you want it to be used globally:
+
+```python
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'yourapp.custom_auth.CustomAuth',
+        # other authentication classes if any
+    ),
+}
+```
+
+### Summary
+
+- **Custom Authentication:** Extend `BaseAuthentication` and override `authenticate()` method.
+- **Usage:** Apply the custom authentication class to specific views or globally in `settings.py`.
+- **Exception Handling:** Ensure to handle exceptions such as `AuthenticationFailed` for proper error responses.
+
+---

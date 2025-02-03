@@ -1,0 +1,58 @@
+### Function-Based Authentication
+
+To use authentication and permission classes in a function-based API view, follow these steps:
+
+1. Import the necessary decorators and classes.
+2. Apply the decorators to the function-based view.
+
+In `views.py`:
+
+```python
+from rest_framework.decorators import api_view, authentication_classes, permission_classes
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.authentication import BasicAuthentication
+
+@api_view(['GET', 'POST', 'PUT', 'DELETE'])
+@authentication_classes([BasicAuthentication])
+@permission_classes([IsAuthenticated])
+def stuff_api(request, id=None):
+    if request.method == 'POST':
+        # Your logic here
+        pass
+    # Handle other methods (GET, PUT, DELETE)
+    pass
+```
+
+### Important Classes and Usage
+
+- **Authentication Classes**:
+  - `BasicAuthentication`: Uses HTTP Basic Authentication.
+  - `SessionAuthentication`: Uses Django's session framework for authentication.
+  - `TokenAuthentication`: Uses token-based authentication.
+
+- **Permission Classes**:
+  - `AllowAny`: No restrictions on access.
+  - `IsAuthenticated`: Only allows authenticated users.
+  - `IsAdminUser`: Only allows admin users.
+  - `IsAuthenticatedOrReadOnly`: Allows read-only access to unauthenticated users and write access to authenticated users.
+  - `DjangoModelPermissions`: Grants access based on Django model permissions.
+
+Using these decorators ensures that your view enforces the required authentication and permission checks.
+
+Example:
+
+```python
+from rest_framework.decorators import api_view, authentication_classes, permission_classes
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.authentication import BasicAuthentication
+
+@api_view(['GET', 'POST', 'PUT', 'DELETE'])
+@authentication_classes([BasicAuthentication])
+@permission_classes([IsAuthenticated])
+def stuff_api(request, id=None):
+    if request.method == 'POST':
+        # Your logic here
+        pass
+    # Handle other methods (GET, PUT, DELETE)
+    pass
+```

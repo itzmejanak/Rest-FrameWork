@@ -1,0 +1,62 @@
+## DeSerialization
+
+The process of converting complex data types into native data types is called serialization. Similarly, serializers are also responsible for deserialization, which means allowing parsed data types to be converted into complex types after validating the incoming data.
+
+### Note
+- The reverse of serialization is called deserialization, which means converting JSON data to native types and finally to complex types.
+- Key terms:
+  - **Parsed data**: JSON data converted to Python native datatype.
+  - **Deserialization**: Native data converted to complex types.
+
+### Steps for DeSerialization
+To perform deserialization, we need knowledge of the following:
+
+#### `BytesIO()`: Streaming JSON Data
+- Import `io` to use it.
+  
+Example:
+```python
+import io
+stream = io.BytesIO(json_data)
+```
+
+#### `JSONParser()`: Parsing JSON Data to Python Native Data Types
+- Import `JSONParser` from `rest_framework.parsers`.
+  
+Example:
+```python
+from rest_framework.parsers import JSONParser
+parsed_data = JSONParser().parse(stream)
+```
+
+### DeSerialization Process
+After the above steps, proceed to deserialization:
+
+1. **Create Serializer Object**
+   ```python
+   seri = ServicesSerializer(data=parsed_data)
+   ```
+
+2. **Validate Data**
+   ```python
+   if seri.is_valid():
+       validated_data = seri.validated_data
+   else:
+       errors = seri.errors
+   ```
+
+### Create/Insert Data (Example: Registering a User)
+
+Example:
+```python
+from rest_framework import serializers
+
+class StudentSerializer(serializers.Serializer):
+    name = serializers.CharField(max_length=100)
+    roll = serializers.IntegerField()
+    city = serializers.CharField(max_length=100)
+
+    def create(self, validated_data):
+        return Student.objects.create(**validated_data)
+```
+---

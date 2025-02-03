@@ -1,0 +1,49 @@
+## Class-Based APIView
+
+The REST framework provides an `APIView` class which subclasses Django's `View` class. API view classes differ from regular view classes in the following ways:
+
+- **Request**: The request passed to the handler methods will be REST framework's `Request` instances, not Django's `HttpRequest` instances.
+- **Response**: Handler methods may return REST framework's `Response` instead of Django's `HttpResponse`. The view will manage content negotiation and set the correct renderer on the response.
+- **Exceptions**: Any `APIException` exceptions will be caught and mediated into an appropriate response.
+- **Authentication and Permissions**: Incoming requests will be authenticated, and appropriate permission and/or throttle checks will be run before dispatching the request to the handler.
+
+### Example
+
+In `views.py`:
+
+```python
+from rest_framework.views import APIView
+from rest_framework.response import Response
+
+class StudentAPI(APIView):
+    def get(self, request):
+        # Logic for GET request
+        return Response({"message": "GET request"})
+
+    def post(self, request):
+        # Logic for POST request
+        return Response({"message": "POST request"})
+
+    def put(self, request):
+        # Logic for PUT request
+        return Response({"message": "PUT request"})
+
+    def patch(self, request):
+        # Logic for PATCH request
+        return Response({"message": "PATCH request"})
+
+    def delete(self, request):
+        # Logic for DELETE request
+        return Response({"message": "DELETE request"})
+```
+
+In `urls.py`, add `as_view()`:
+
+```python
+from django.urls import path
+from .views import StudentAPI
+
+urlpatterns = [
+    path('student/', StudentAPI.as_view(), name='student-api'),
+]
+```

@@ -39,6 +39,10 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rest_framework',
     'RestOne',
+    'RegisterUser',
+    'curd',
+    'apiCurd',
+    'genericApi',
 ]
 
 MIDDLEWARE = [

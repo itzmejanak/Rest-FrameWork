@@ -1,0 +1,72 @@
+## CRUD API
+
+To insert data, we implement the `create` method. Similarly, for updating data, we implement the `update` method.
+
+### Note
+We will use database methods for CRUD operations, and they will be implemented in the `serializers.py` file.
+
+### Update
+Implement the `update` method in the related serializer class.
+
+Example:
+```python
+from rest_framework import serializers
+
+class StudentSerializer(serializers.Serializer):
+    name = serializers.CharField(max_length=100)
+    roll = serializers.IntegerField()
+    city = serializers.CharField(max_length=100)
+
+    # We need all data from the user mention in the table
+    def create(self, validate_data):
+	ModelClass[file].ModelClass.objects.create(**validate_data)
+
+    def update(self, instance, validated_data):
+        instance.name = validated_data.get('name', instance.name)
+        instance.roll = validated_data.get('roll', instance.roll)
+        instance.city = validated_data.get('city', instance.city)
+        instance.save()
+        return instance
+```
+
+#### Understanding Terms
+- **Instance**: The row of data stored in the database.
+- **Validated_data**: The data provided by the user.
+
+### Update: Partial
+By default, serializers require all fields to be provided, otherwise, they raise a validation error. For partial updates, not all data is required.
+
+In `views.py`:
+```python
+from rest_framework.response import Response
+from rest_framework.decorators import api_view
+from .serializers import StudentSerializer
+from .models import Student
+
+@api_view(['PATCH'])
+def partial_update_student(request, pk):
+    student = Student.objects.get(pk=pk)
+    serializer = StudentSerializer(student, data=request.data, partial=True) # partial=True allows partial update
+    if serializer.is_valid():
+        serializer.save()
+        return Response(serializer.data)
+    return Response(serializer.errors)
+```
+
+### Example: Full Update
+In `views.py`:
+```python
+from rest_framework.response import Response
+from rest_framework.decorators import api_view
+from .serializers import StudentSerializer
+from .models import Student
+
+@api_view(['PUT'])
+def update_student(request, pk):
+    student = Student.objects.get(pk=pk)
+    serializer = StudentSerializer(student, data=request.data) # without partial=True for full update
+    if serializer.is_valid():
+        serializer.save()
+        return Response(serializer.data)
+    return Response(serializer.errors)
+```

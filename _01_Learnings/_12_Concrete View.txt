@@ -1,0 +1,126 @@
+### Concrete View Classes
+
+These classes are part of the Django REST Framework and provide ready-to-use views for common API patterns. They extend generic views and are typically used when you need standard behavior without heavy customization.
+
+#### ListAPIView
+
+- **Used for**: Displaying a list of model instances.
+- **Extends**: `GenericAPIView` and `ListModelMixin`.
+- **Example**:
+  ```python
+  from rest_framework.generics import ListAPIView
+  from .models import studentsInfo
+  from .serializers import seriStudents
+
+  class StudentListView(ListAPIView):
+      queryset = studentsInfo.objects.all()
+      serializer_class = seriStudents
+  ```
+
+#### CreateAPIView
+
+- **Used for**: Creating a new model instance; provides POST method handler.
+- **Extends**: `GenericAPIView` and `CreateModelMixin`.
+- **Example**:
+  ```python
+  from rest_framework.generics import CreateAPIView
+  from .models import studentsInfo
+  from .serializers import seriStudents
+
+  class StudentCreateView(CreateAPIView):
+      queryset = studentsInfo.objects.all()
+      serializer_class = seriStudents
+  ```
+
+#### RetrieveAPIView
+
+- **Used for**: Retrieving a single model instance.
+- **Extends**: `GenericAPIView` and `RetrieveModelMixin`.
+- **Example**:
+  ```python
+  from rest_framework.generics import RetrieveAPIView
+  from .models import studentsInfo
+  from .serializers import seriStudents
+
+  class StudentDetailView(RetrieveAPIView):
+      queryset = studentsInfo.objects.all()
+      serializer_class = seriStudents
+  ```
+
+#### UpdateAPIView
+
+- **Used for**: Updating a model instance; supports PUT and PATCH methods.
+- **Extends**: `GenericAPIView` and `UpdateModelMixin`.
+- **Example**:
+  ```python
+  from rest_framework.generics import UpdateAPIView
+  from .models import studentsInfo
+  from .serializers import seriStudents
+
+  class StudentUpdateView(UpdateAPIView):
+      queryset = studentsInfo.objects.all()
+      serializer_class = seriStudents
+  ```
+
+#### DestroyAPIView
+
+- **Used for**: Deleting a model instance.
+- **Extends**: `GenericAPIView` and `DestroyModelMixin`.
+- **Example**:
+  ```python
+  from rest_framework.generics import DestroyAPIView
+  from .models import studentsInfo
+
+  class StudentDeleteView(DestroyAPIView):
+      queryset = studentsInfo.objects.all()
+  ```
+
+### Combined Classes
+
+These classes combine multiple actions into a single view.
+
+#### ListCreateAPIView
+
+- **Used for**: Listing and creating model instances; supports GET and POST methods.
+- **Extends**: `GenericAPIView`, `ListModelMixin`, and `CreateModelMixin`.
+- **Example**:
+  ```python
+  from rest_framework.generics import ListCreateAPIView
+  from .models import studentsInfo
+  from .serializers import seriStudents
+
+  class StudentListCreateView(ListCreateAPIView):
+      queryset = studentsInfo.objects.all()
+      serializer_class = seriStudents
+  ```
+
+#### RetrieveUpdateAPIView
+
+- **Used for**: Retrieving and updating a model instance; supports GET, PUT, and PATCH methods.
+- **Extends**: `GenericAPIView`, `RetrieveModelMixin`, and `UpdateModelMixin`.
+- **Example**:
+  ```python
+  from rest_framework.generics import RetrieveUpdateAPIView
+  from .models import studentsInfo
+  from .serializers import seriStudents
+
+  class StudentRetrieveUpdateView(RetrieveUpdateAPIView):
+      queryset = studentsInfo.objects.all()
+      serializer_class = seriStudents
+  ```
+
+#### RetrieveUpdateDestroyAPIView
+
+- **Used for**: Retrieving, updating, and deleting a model instance; supports GET, PUT, PATCH, and DELETE methods.
+- **Extends**: `GenericAPIView`, `RetrieveModelMixin`, `UpdateModelMixin`, and `DestroyModelMixin`.
+- **Example**:
+  ```python
+  from rest_framework.generics import RetrieveUpdateDestroyAPIView
+  from .models import studentsInfo
+  from .serializers import seriStudents
+
+  class StudentRetrieveUpdateDestroyView(RetrieveUpdateDestroyAPIView):
+      queryset = studentsInfo.objects.all()
+      serializer_class = seriStudents
+  ```
+---

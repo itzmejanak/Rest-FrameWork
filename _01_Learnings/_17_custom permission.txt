@@ -1,0 +1,20 @@
+#### Custom Permission
+
+To implement a custom permission, override `BasePermission` and implement either or both of the following methods:
+
+- `has_permission(self, request, view)`
+- `has_object_permission(self, request, view, obj)`
+
+These methods should return `True` if the request should be granted access and `False` otherwise.
+
+For making custom permissions, it's best to create a separate file, `custom_permission.py`. Inside it, define your class:
+
+```python
+from rest_framework.permissions import BasePermission
+
+class MyPermission(BasePermission):
+    def has_permission(self, request, view):
+        # Logic here
+        return True
+```
+---

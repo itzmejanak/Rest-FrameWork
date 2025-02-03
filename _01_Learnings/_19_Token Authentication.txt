@@ -1,0 +1,135 @@
+### Token Authentication
+
+Token authentication uses a simple token-based HTTP authentication scheme. It's suitable for client-server setups such as native desktop and mobile clients. To configure it, follow these steps:
+
+1. **Configure Authentication Classes**: Include token authentication in your authentication classes.
+2. **Install `rest_framework.authtoken`**: Add it to your `INSTALLED_APPS` setting.
+
+**Note**: Run `manage.py migrate` after changing your settings to apply the necessary database migrations.
+
+When token authentication is successful, it provides the following credentials:
+- `request.user`: Django user instance
+- `request.auth`: REST framework's `Token` instance
+
+Unauthenticated requests that are denied permission will result in an HTTP 401 Unauthorized response with an appropriate `WWW-Authenticate` header, e.g., `WWW-Authenticate: Token`.
+
+**Token Authentication Configuration**:
+
+1. **Settings Configuration**:
+    ```python
+    INSTALLED_APPS = [
+        ...
+        'rest_framework',
+        'rest_framework.authtoken',
+    ]
+
+    REST_FRAMEWORK = {
+        'DEFAULT_AUTHENTICATION_CLASSES': [
+            'rest_framework.authentication.TokenAuthentication',
+        ],
+    }
+    ```
+
+2. **Generate Token**:
+    - Using the admin application.
+    - Using the Django management command:
+        ```bash
+        python manage.py drf_create_token <username>
+        ```
+        This command returns an API token for the given user or creates a token if one doesn't exist.
+    - By exposing an API endpoint.
+    - Using signals.
+
+**Obtaining Tokens via API**:
+
+1. **Obtain Auth Token Endpoint**:
+    ```python
+    from rest_framework.authtoken.views import obtain_auth_token
+    from django.urls import path
+
+    urlpatterns = [
+        path('get-token/', obtain_auth_token, name='api_token_auth'),
+    ]
+    ```
+
+    The `obtain_auth_token` view returns a JSON response when valid username and password fields are posted to the view.
+
+2. **Example Request**:
+    ```bash
+    http POST http://127.0.0.1:8000/get-token/ username=<username> password=<password>
+    ```
+
+**Custom Auth Token View**:
+- In `views.py`:
+    ```python
+    from rest_framework.authtoken.views import ObtainAuthToken
+    from rest_framework.authtoken.models import Token
+    from rest_framework.response import Response
+
+    class CustomAuthToken(ObtainAuthToken):
+        def post(self, request, *args, **kwargs):
+            serializer = self.serializer_class(data=request.data, context={'request': request})
+            serializer.is_valid(raise_exception=True)
+            user = serializer.validated_data['user']
+            token, created = Token.objects.get_or_create(user=user)
+            return Response({
+                'token': token.key,
+                'user_id': user.pk,
+                'email': user.email
+            })
+    ```
+
+- In `urls.py`:
+    ```python
+    from django.urls import path
+    from .views import CustomAuthToken
+
+    urlpatterns = [
+        path('get-token/', CustomAuthToken.as_view()),
+    ]
+    ```
+
+**Using Signals to Generate Token**:
+- In `models.py`:
+    ```python
+    from django.conf import settings
+    from django.db.models.signals import post_save
+    from django.dispatch import receiver
+    from rest_framework.authtoken.models import Token
+
+    @receiver(post_save, sender=settings.AUTH_USER_MODEL)
+    def create_auth_token(sender, instance=None, created=False, **kwargs):
+        if created:
+            Token.objects.create(user=instance)
+    ```
+
+### HTTPie
+HTTPie is a command-line HTTP client for testing APIs.
+
+**Syntax**:
+```bash
+http [METHOD] URL [HEADERS] [QUERY] [REQUEST_DATA]
+```
+
+**Examples**:
+- **GET Request**:
+    ```bash
+    http GET http://127.0.0.1:8000/api/stuff/
+    ```
+- **GET with Auth**:
+    ```bash
+    http GET http://127.0.0.1:8000/api/stuff/ "Authorization: Token your_token_here"
+    ```
+- **POST Request**:
+    ```bash
+    http POST http://127.0.0.1:8000/api/stuff/ name="new stuff" description="description here"
+    ```
+- **PUT Request**:
+    ```bash
+    http PUT http://127.0.0.1:8000/api/stuff/1/ name="updated stuff" description="updated description"
+    ```
+- **DELETE Request**:
+    ```bash
+    http DELETE http://127.0.0.1:8000/api/stuff/1/
+    ```
+---

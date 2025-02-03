@@ -1,0 +1,79 @@
+## Model Serializer Class
+
+- Model serializer class provides a shortcut that lets us auto-create serializer classes with fields that correspond to the model class.
+- It will auto-generate a set of fields for us which are defined in the related model class.
+- It will auto-generate the validators for the serializers, such as `unique_together` validators.
+- It includes a simple default implementation of `create()` and `update()`.
+
+### Creating ModelSerializer Class
+
+- In `serializers.py` file, add the following:
+
+```python
+import serializers
+
+class SrisClass(serializers.ModelSerializer):  # Note here serializers.ModelSerializer
+    class Meta:
+        model = Student  # imported model class
+        fields = ['name', 'roll']  # or we can use
+        fields = '__all__'
+        exclude = ['__']  # if some fields need to be excluded
+```
+
+If we use this class, we will get these benefits:
+- No need to create `create` and `update` methods in the serializer subclass.
+
+### Validation with ModelSerializer Class
+
+If some specific fields need to be validated, we have to include that field name specifically like this:
+
+```python
+class StudSerializer(serializers.ModelSerializer):
+    name = serializers.CharField(read_only=True)
+    
+    class Meta:
+        model = Student
+        fields = ['name', 'roll']
+```
+
+Or we can do:
+
+```python
+class StudSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Student
+        fields = ['name', 'roll']
+        read_only_fields = ['name', 'roll']  # or
+        extra_kwargs = {'name': {'read_only': True}}
+```
+
+As we read about three types of validation ways in the serializer class, we can use those three ways in the `ModelSerializer` class as well.
+
+```python
+class StudSerializer(serializers.ModelSerializer):
+    # For Validators:
+    # Define this method outside of the Meta class and inside the main class
+    def starts_with_j(value):
+        if value[0].lower() != 'j':
+            raise serializers.ValidationError("Name must start with 'j'")
+    
+    name = serializers.CharField(max_length=100, validators=[starts_with_j])  # Specify field name which needs validator validation
+    class Meta:
+        model = Student
+        fields = ['name', 'roll']
+
+    # For Field Level Validation:
+    def validate_roll(self, value):
+        if value >= 200:
+            raise serializers.ValidationError("Max seats packed")
+        return value
+
+    # For Object Level Validation:
+    def validate(self, data):
+        name = data.get('name')
+        roll = data.get('roll')
+        # Add your condition/logic here
+        # Raise error if necessary
+        return data
+```
+---

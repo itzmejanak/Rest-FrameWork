@@ -1,0 +1,70 @@
+## Validation
+
+- We can do validation in three different ways:
+
+### 1. Field Level Validation
+- We can validate a field in our serializer class by adding a `validate_fieldName` method.
+- `validate_fieldName` methods return the validated value or occurred errors.
+
+**Syntax:**
+```python
+def validate_fieldName(self, value):
+    # value = field value that requires validation means given by user value
+```
+
+**Example:**
+```python
+class SerializerClass(serializers.Serializer):
+    name = serializers.CharField(max_length=100)
+
+    def validate_name(self, value):
+        # logic here
+```
+
+**Note:**
+- `validate_name` method is auto-called when `is_valid` method is called.
+
+### 2. Object Level Validation
+- When we need to validate data that requires access to multiple fields, we have to do object-level validation by adding a method called `validate()` to the serializer subclass.
+- It returns the validated values. If validation fails, it will return the validation error.
+
+**Syntax:**
+```python
+def validate(self, data):
+    # data = the whole data to be validated, given by user in dict format
+```
+
+**Example:**
+```python
+class SerializerClass(serializers.Serializer):
+    name = serializers.CharField(max_length=100)
+    roll = serializers.IntegerField()
+
+    def validate(self, data):
+        name = data.get('name')
+        roll = data.get('roll')
+        if name.lower() == '__' and roll != '__':
+            raise serializers.ValidationError("City must be __")
+        return data
+```
+
+### 3. Validators
+- Whenever we are dealing with default field validation or writing explicit validation methods on our serializer class, we can simply use validators.
+- It introduces a proper separation of concerns, making our code behavior more obvious.
+- It is easy to switch between using the shortcut `ModelSerializer` class and using an explicit serializer class. Any validation behavior used for `ModelSerializer` is simple to replicate.
+
+**Example:**
+- We can make a function that will validate our field outside of the class.
+
+```python
+def starts_with_j(value):
+    if value[0].lower() != 'j':
+        raise serializers.ValidationError("Name must start with 'j'")
+
+class SerializerClass(serializers.Serializer):
+    name = serializers.CharField(max_length=100, validators=[starts_with_j])
+```
+
+**Note:**
+- **Prarioty of validation**: Validators have first Prarioty second for fields lavel and at last object level validation.
+---

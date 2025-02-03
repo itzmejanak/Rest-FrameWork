@@ -1,0 +1,93 @@
+## Function-Based API View
+
+Up to here, what we read is all about the behind-the-scenes working of Django. But we are not using the full potential of the Django REST framework. Because we are writing a lot of code in `views.py` for serialization and deserialization of the data, this concept is very necessary to go further. So now we are going to make everything short by using the REST framework's power. Let's begin.
+
+### Function-Based API View
+This wrapper provides a few bits of functionality such as making sure you receive a request instance in your view and adding context to the response object so that content negotiation can be performed.
+
+The wrapper also provides behavior such as returning a `405 Method Not Allowed` response when appropriate and handling any `ParseError` exception that occurs when accessing `request.data` with malformed input.
+
+By default, only the GET method will be accepted. Other methods will respond with `405 Method Not Allowed`.
+
+```python
+@api_view()  # By default, GET method
+```
+
+For other methods, we have to specify them ourselves:
+```python
+@api_view(['POST', 'PUT', 'DELETE'])
+```
+
+Below the `api_view()` decorator, we can define our method:
+```python
+def function_name(request):
+    # logic here
+```
+
+### Examples
+
+1. `api_view(['GET'])`
+```python
+from rest_framework.decorators import api_view
+from rest_framework.response import Response
+
+@api_view(['GET'])
+def student_list(request):
+    if request.method == "GET":
+        students = Students.objects.all()
+        serializer = StudentsSerializer(students, many=True)
+        return Response(serializer.data)
+```
+
+2. `api_view(['POST'])`
+```python
+from rest_framework.decorators import api_view
+from rest_framework.response import Response
+from rest_framework import status
+
+@api_view(['POST'])
+def student_list(request):
+    if request.method == "POST":
+        serializer = StudentsSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response({'msg': 'Data created'}, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+```
+
+### Understanding `request`
+
+**Request:**
+REST framework's request object provides flexible request parsing that allows us to treat requests with JSON data or other media types in the same way that we normally deal with form data.
+
+- **request.data**
+  - `request.data` returns the parsed content of the request body. This is similar to the standard `request.POST` and `request.FILES` attributes except that:
+    - It includes all parsed content, including file and non-file inputs.
+    - It supports parsing the content of HTTP methods other than POST, meaning that we can access the content of PUT and PATCH requests.
+
+- **request.method**
+  - `request.method` returns the uppercased string representation of the request HTTP method used by the client.
+
+- **request.query_params**
+  - `request.query_params` is a more correctly named synonym for `request.GET`.
+  - For clarity inside your code, it is recommended to use `request.query_params` instead of Django's standard `request.GET`. Doing so will help keep your codebase more correct and obvious, as any HTTP method type may include query parameters, not just GET requests.
+
+### Response()
+
+REST framework supports HTTP content negotiation by providing a `Response` class which allows you to return content that can be rendered into multiple content types, depending on the client request.
+
+**Response objects** are initialized with data, which should consist of native Python primitives. REST framework then uses standard HTTP content negotiation to determine how it should render the final response content.
+
+The `Response` class provides a nicer interface for returning content-negotiated Web API responses that can be rendered to multiple formats.
+
+**Syntax:**
+```python
+Response(data, status=None, template_name=None, headers=None, content_type=None)
+```
+
+- **data**: The unrendered, serialized data for the response.
+- **status**: A status code for the response. Defaults to 200.
+- **template_name**: A template name to use only if `HTMLRenderer` or some other custom template renderer is the accepted renderer for the response.
+- **headers**: A dictionary of HTTP headers to use in the response.
+- **content_type**: The content type of the response. Typically, this will be set automatically by the renderer as determined by content negotiation, but there may be some cases where you need to specify the content type explicitly.
+---

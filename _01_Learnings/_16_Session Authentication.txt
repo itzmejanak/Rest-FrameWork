@@ -1,0 +1,114 @@
+## Session Authentication
+
+### Overview
+- This authentication scheme uses Django's default session backend for authentication.
+- Session authentication is appropriate for AJAX clients running in the same session context as your website.
+
+### Successful Authentication
+- `request.user` will be a Django User instance.
+- `request.auth` will be `None`.
+
+### Unauthenticated Responses
+- Denied permissions will result in an HTTP 403 Forbidden response.
+
+### CSRF Considerations
+- When using an AJAX-style API with SessionAuthentication, ensure you include a valid CSRF token for any "unsafe" HTTP method calls, such as PUT, PATCH, POST, or DELETE requests.
+
+## Permissions
+
+### Overview
+- Permissions are used to grant or deny access for different classes of users to different parts of the API.
+- Permission checks are always run at the very start of the view before any other code is allowed to proceed.
+- Permission checks typically use the authentication information in the `request.user` and `request.auth` properties to determine if the incoming request should be permitted.
+
+### Permission Classes
+- Permissions in REST framework are always defined as a list of permission classes:
+  - `IsAuthenticated`
+  - `IsAuthenticatedOrReadOnly`
+  - `DjangoModelPermissions`
+  - `DjangoModelPermissionsOrAnonReadOnly`
+  - `DjangoObjectPermissions`
+  - `CustomPermissions`
+
+#### `IsAuthenticated`
+- Allows access only to authenticated users.
+
+#### `IsAuthenticatedOrReadOnly`
+- Allows full access to authenticated users and read-only access to unauthenticated users.
+
+#### `DjangoModelPermissions`
+This permission class ties into Django's standard `django.contrib.auth` model permissions. It must only be applied to views that have a `queryset` property set. Authorization is granted if the user is authenticated and has the relevant model permissions.
+
+- **POST** requests require the user to have the add permission on the model.
+- **PUT** and **PATCH** requests require the user to have the change permission on the model.
+- **DELETE** requests require the user to have the delete permission on the model.
+
+The default behavior can be overridden to support custom model permissions. For example, you might want to include a view model permission for GET requests. To use custom model permissions, override `DjangoModelPermissions` and set the `perms_map` property.
+
+
+#### `DjangoModelPermissionsOrAnonReadOnly`
+- Uses model permissions, allowing read-only access to unauthenticated users and after user `IsAuthenticated` then can do CURD if model permission is given.
+
+Here's an explanation and example for `DjangoObjectPermissions`:
+
+### DjangoObjectPermissions
+
+#### Overview
+- This permission class integrates with Django's standard object permissions framework to allow per-object permissions on models.
+- Requires a permission backend that supports object-level permissions, such as `django-guardian`.
+
+#### Requirements
+- Must be used with views that have a `queryset` property or `get_queryset()` method.
+- Authorization is granted only if the user is authenticated and has the relevant per-object and model permissions assigned.
+
+#### Permission Details
+- **POST requests:** Require the `add` permission on the model instance.
+- **PUT and PATCH requests:** Require the `change` permission on the model instance.
+- **DELETE requests:** Require the `delete` permission on the model instance.
+
+### Example
+
+```python
+from rest_framework.permissions import DjangoObjectPermissions
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from myapp.models import MyModel
+from rest_framework import status
+
+class MyObjectView(APIView):
+    permission_classes = [DjangoObjectPermissions]
+    queryset = MyModel.objects.all()
+
+    def get(self, request, pk):
+        instance = self.get_object()
+        return Response({'data': 'Details of the object'})
+
+    def post(self, request):
+        # Ensure user has 'add' permission
+        # Handle the creation logic
+        return Response({'message': 'Object created'}, status=status.HTTP_201_CREATED)
+
+    def put(self, request, pk):
+        # Ensure user has 'change' permission
+        # Handle the update logic
+        return Response({'message': 'Object updated'})
+
+    def delete(self, request, pk):
+        # Ensure user has 'delete' permission
+        # Handle the delete logic
+        return Response({'message': 'Object deleted'}, status=status.HTTP_204_NO_CONTENT)
+
+    def get_object(self):
+        # Custom method to retrieve the object based on the pk
+        # This is a placeholder for actual retrieval logic
+        return MyModel.objects.get(pk=pk)
+```
+
+### Explanation
+- **Permission Class:** Uses `DjangoObjectPermissions` to enforce per-object permissions.
+- **Permission Backend:** Ensure `django-guardian` is installed and configured.
+- **Queryset:** Required for applying object permissions.
+- **Methods:** Check for specific permissions (add, change, delete) based on the request method.
+
+#### `CustomPermissions`
+- Custom permissions can be implemented by subclassing the `BasePermission` class and overriding the `has_permission` and/or `has_object_permission` methods.
